@@ -71,6 +71,7 @@ set_platform() {
   if [ -z $PLATFORM ]; then
     export PLATFORM=`uname`
   fi
+  echo "PLATFORM = $PLATFORM"
 }
 
 # Set DKTL_MODE. Determine whether we want to run inside the docker container 
@@ -84,6 +85,7 @@ set_mode() {
     echo "Incorrect DKTL_MODE set to ${DKTL_MODE}. Appropriate values are 'DOCKER' and 'HOST'."
     exit 1
   fi
+  echo "DKTL_MODE = $DKTL_MODE"
 }
 
 # Check dkan-tools dependencies, exit if unmet
@@ -109,7 +111,7 @@ set_project_directory() {
     while [[ "$path" != "" && ! -e "$path/$1" ]]; do
       path=${path%/*}
     done
-    echo "$path"
+    echo "set_project_directory path = $path"
   }
 
   DKTL_PROJECT_DIRECTORY=$(find_up dktl.yml)
@@ -122,6 +124,7 @@ set_project_directory() {
     fi
   fi
   export DKTL_PROJECT_DIRECTORY
+  echo "The value for DKTL_PROJECT_DIRECTORY is: $DKTL_PROJECT_DIRECTORY"
 }
 
 # Set DKTL_DIRECTORY
@@ -134,10 +137,8 @@ set_directory() {
     DKTL_DIRECTORY=$(readlink $RL_OPT "$DKTL_DIRECTORY")
   fi
   DKTL_DIRECTORY=$(dirname "$DKTL_DIRECTORY")
-  echo "The value for DKTL_DIRECTORY is:"
-  echo $DKTL_DIRECTORY
-  echo "********************************"
   export DKTL_DIRECTORY
+  echo "The value for DKTL_DIRECTORY is: $DKTL_DIRECTORY"
 }
 
 # Set DKTL_SLUG
@@ -148,10 +149,8 @@ set_slug() {
     DKTL_SLUG=${DKTL_SLUG//_/}
     # Mixed case dirs cause issue with docker image names
     DKTL_SLUG=$(echo ${DKTL_SLUG} | tr -d '[:space:]' | tr "[A-Z]" "[a-z]")
-    echo "The value for DKTL_SLUG is:"
-    echo $DKTL_SLUG
-    echo "********************************"
     export DKTL_SLUG
+    echo "The value for DKTL_SLUG is: $DKTL_SLUG"
   fi
 }
 
@@ -165,11 +164,10 @@ docker_vars_init() {
     export DKTL_PROXY_DOMAIN="$DKTL_SLUG.$WEB_DOMAIN"
   fi
   
-  echo "The value for COMMON_CONF is:"
-  echo $COMMON_CONF
   COMMON_CONF="$DKTL_DIRECTORY/assets/docker/docker-compose.common.yml"
   OVERRIDES_CONF="$DKTL_PROJECT_DIRECTORY/src/docker/docker-compose.overrides.yml"
-
+  echo "The value for COMMON_CONF is: $COMMON_CONF"
+  
   # Check for interactive shell if DKTL_NO_PTY is not set
   if [ ! -z "$DKTL_NO_PTY" ]; then
     EXEC_OPTS='-T'
@@ -181,6 +179,11 @@ docker_vars_init() {
 }
 
 dc_base() {
+  echo "Running dc_base function with args:"
+  echo "           COMMON_CONF=$COMMON_CONF"
+  echo "             DKTL_SLUG=$DKTL_SLUG"
+  echo "DKTL_PROJECT_DIRECTORY=$DKTL_PROJECT_DIRECTORY"
+  echo "       Everything else=$@"
   dc=( docker-compose \
     --file "$COMMON_CONF" \
     --project-name $DKTL_SLUG \
