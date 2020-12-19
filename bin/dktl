@@ -111,7 +111,7 @@ set_project_directory() {
     while [[ "$path" != "" && ! -e "$path/$1" ]]; do
       path=${path%/*}
     done
-    echo "set_project_directory path = $path"
+    echo "$path"
   }
 
   DKTL_PROJECT_DIRECTORY=$(find_up dktl.yml)
